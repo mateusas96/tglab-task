@@ -1,13 +1,12 @@
 import './App.css';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Button, TableCell, TableContainer, TableRow, TextField, Table, Paper, TableBody } from '@material-ui/core';
+import React, { useCallback, useState } from 'react';
+import { Box, Button, TableCell, TableContainer, TableRow, TextField, Table, TableBody } from '@material-ui/core';
 import TeamsTable from './components/TeamsTable';
 import { getLocalStorage, setLocalStorage } from './components/LocalStorage';
 import TeamPlaysTable from './components/TeamPlaysTable';
 
 function App() {
-
-	const [error, setError] = useState('');
+	const [errorMessage, setErrorMessage] = useState('');
 	const [validationPassed, setValidationPassed] = useState(true);
 	const [reloadTable, setReloadTable] = useState(0);
 
@@ -16,7 +15,7 @@ function App() {
 		let error = false;
 
 		if (newTeamName === '') {
-			setError('Team name cannot be empty');
+			setErrorMessage('Team name cannot be empty');
 			error = true;
 		}
 
@@ -24,13 +23,13 @@ function App() {
 		
 		teams.forEach(team => {
 			if (team.name === newTeamName) {
-				setError('Team already exists');
+				setErrorMessage('Team already exists');
 				error = true;
 			}
 		});
 
 		setValidationPassed(!error);
-		error ? null : setError('');
+		error ? null : setErrorMessage('');
 
 		validateOnChange ? null : (!error ? addNewTeam() : null);
 	}, []);
@@ -66,7 +65,7 @@ function App() {
 										label="New team"
 										id="teamName"
 										error={!validationPassed}
-										helperText={error}
+										helperText={errorMessage}
 										onChange={() => {
 											validate(true)
 										}}
@@ -93,6 +92,7 @@ function App() {
 								<TableCell>
 									<TeamPlaysTable
 										reloadTable={reloadTable}
+										setReloadTable={setReloadTable}
 									/>
 								</TableCell>
 							</TableRow>

@@ -1,32 +1,111 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Table, TableContainer, Paper, TableBody, TableRow, TableCell, TextField } from "@material-ui/core";
-import { getLocalStorage } from '../LocalStorage';
+import { getLocalStorage, setLocalStorage } from '../LocalStorage';
+import _ from 'lodash';
 
 export default function TeamPlaysTable(props) {
     const [teamPlays, setTeamPlays] = useState([]);
 
     useEffect(() => {
         const teams = getLocalStorage('teams');
-        const teamPlays = [];
+        const teamSavedPlays = getLocalStorage('team_saved_plays');
 
         for (let i = 0; i < teams.length; i++) {
             if (i + 1 < teams.length) {
                 for (let j = i + 1; j < teams.length; j++) {
-                    teamPlays.push({
-                        teamName1: teams[i].name,
-                        teamScore1: '',
-                        teamName2: teams[j].name,
-                        teamScore2: ''
-                    });
+                    const playExists = Boolean(teamSavedPlays.find(tsp => {
+                        return (
+                            tsp.teamName1.includes(teams[i].name) && tsp.teamName2.includes(teams[j].name) ||
+                            tsp.teamName1.includes(teams[j].name) && tsp.teamName2.includes(teams[i].name)
+                        );
+                    }));
+
+                    if (!playExists) {
+                        teamSavedPlays.push({
+                            teamName1: teams[i].name,
+                            teamScore1: '',
+                            teamName2: teams[j].name,
+                            teamScore2: ''
+                        });
+                    }
                 }
             }
         }
 
-        setTeamPlays(teamPlays);
+        setLocalStorage('team_saved_plays', teamSavedPlays);
+        setTeamPlays(getLocalStorage('team_saved_plays'));
     }, [props.reloadTable]);
 
+    const saveScore = useCallback((index, teamName, value) => {
+        const teamSavedPlays = getLocalStorage('team_saved_plays');
+
+        if (teamSavedPlays[index].teamName1.includes(teamName)) {
+            teamSavedPlays[index].teamScore1 = value;
+        }
+
+        if (teamSavedPlays[index].teamName2.includes(teamName)) {
+            teamSavedPlays[index].teamScore2 = value;
+        }
+        
+        setLocalStorage('team_saved_plays', teamSavedPlays);
+        updateTeamsTable(index, teamSavedPlays);
+    }, []);
+
+    const updateTeamsTable = useCallback((index, teamSavedPlays) => {
+        const teams = getLocalStorage('teams');
+
+        if (teamSavedPlays[index].teamScore1 !== '' && teamSavedPlays[index].teamScore2 !== '') {
+            let teamIndex1 = findTeamIndex(teams, teamSavedPlays[index].teamName1);
+            let teamIndex2 = findTeamIndex(teams, teamSavedPlays[index].teamName2);
+
+            if (teamSavedPlays[index].teamScore1 > teamSavedPlays[index].teamScore2) {
+                // team #1
+                teams[teamIndex1].played += 1;
+                teams[teamIndex1].win += 1;
+                teams[teamIndex1].points += 3;
+
+                // team #2
+                teams[teamIndex2].played += 1;
+                teams[teamIndex2].lost += 1;
+            } else if (teamSavedPlays[index].teamScore1 < teamSavedPlays[index].teamScore2) {
+                // team #1
+                teams[teamIndex1].played += 1;
+                teams[teamIndex1].lost += 1;
+
+                // team #2
+                teams[teamIndex2].played += 1;
+                teams[teamIndex2].win += 1;
+                teams[teamIndex2].points += 3;
+            } else if (teamSavedPlays[index].teamScore1 === teamSavedPlays[index].teamScore2) {
+                // team #1
+                teams[teamIndex1].played += 1;
+                teams[teamIndex1].draw += 1;
+                teams[teamIndex1].points += 1;
+
+                // team #2
+                teams[teamIndex2].played += 1;
+                teams[teamIndex2].draw += 1;
+                teams[teamIndex2].points += 1;
+            }
+
+            const sortedTeams = _.sortBy(teams, 'points').reverse();
+            setLocalStorage('teams', sortedTeams);
+        }
+        props.setReloadTable((oldVal) => oldVal + 1);
+    }, []);
+
+    const findTeamIndex = useCallback((teams, teamName) => {
+        return teams.findIndex((team) => {
+            return team.name === teamName;
+        });
+    }, []);
+
     return (
-        <TableContainer component={Paper} className="teamPlaysTableContainer">
+        <TableContainer
+            component={Paper}
+            className="teamPlaysTableContainer"
+            style={{ display: teamPlays.length === 0 ? 'none' : '' }}
+        >
 			<Table>
 				<TableBody>
 					{teamPlays.map((play, index) => (
@@ -34,20 +113,25 @@ export default function TeamPlaysTable(props) {
                             <TableCell>
                                 {play.teamName1}
                             </TableCell>
-                            <TableCell>
+                            <TableCell align="right">
                                 <TextField
+                                    disabled={play.teamScore1 !== ''}
                                     type="number"
                                     InputProps={{
                                         inputProps: {
                                             min: 0,
                                         },
                                     }}
+                                    defaultValue={play.teamScore1}
                                     style={{width: '50px'}}
+                                    onBlur={(event) => {
+                                        saveScore(index, play.teamName1, event.target.value);
+                                    }}
                                 >
                                 </TextField>
                             </TableCell>
-                            <TableCell>:</TableCell>
-                            <TableCell>
+                            <TableCell style={{ fontWeight: 'bold' }} align="center">:</TableCell>
+                            <TableCell align="left">
                                 <TextField
                                     disabled={play.teamScore2 !== ''}
                                     type="number"
@@ -56,7 +140,11 @@ export default function TeamPlaysTable(props) {
                                             min: 0,
                                         },
                                     }}
+                                    defaultValue={play.teamScore2}
                                     style={{width: '50px'}}
+                                    onBlur={(event) => {
+                                        saveScore(index, play.teamName2, event.target.value);
+                                    }}
                                 >
                                 </TextField>
                             </TableCell>

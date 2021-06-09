@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, TableCell, TableContainer, TableHead, Paper, TableBody, TableRow, Box } from "@material-ui/core";
+import { Table, TableCell, TableContainer, TableHead, Paper, TableBody, TableRow } from "@material-ui/core";
 import { getLocalStorage } from '../LocalStorage';
 
 export default function TeamsTable(props) {

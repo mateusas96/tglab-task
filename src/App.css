@@ -18,11 +18,11 @@
 .tableContainer {
 	min-width: 10rem;
 	max-width: 40rem;
-	max-height: 30rem;
+	height: 30rem;
 }
 
 .teamPlaysTableContainer {
 	min-width: 10rem;
 	max-width: 30rem;
-	max-height: 30rem;
+	height: 30rem;
 }
