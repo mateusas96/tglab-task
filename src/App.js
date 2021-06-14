@@ -1,14 +1,27 @@
-import { Button, Grid, TextField } from '@material-ui/core';
+import { Button, Grid, makeStyles, TextField } from '@material-ui/core';
 import React, { useCallback, useState } from 'react';
 import './App.css';
 import { getLocalStorage, setLocalStorage } from './components/LocalStorage';
 import TeamPlaysTable from './components/TeamPlaysTable';
 import TeamsTable from './components/TeamsTable';
 
+const useStyles = makeStyles(() => ({
+	button: {
+		marginLeft: '1rem',
+		marginTop: '0.5rem',
+	},
+	grid: {
+		padding: '0 2rem',
+		overflowX: 'auto',
+	},
+}));
+
 function App() {
 	const [errorMessage, setErrorMessage] = useState('');
 	const [validationPassed, setValidationPassed] = useState(true);
 	const [reloadTable, setReloadTable] = useState(0);
+
+	const classes = useStyles();
 
 	const validate = useCallback((validateOnChange) => {
 		const newTeamName = document.getElementById('teamName').value;
@@ -54,14 +67,14 @@ function App() {
 		teams.push(newTeam);
 
 		setLocalStorage('teams', teams);
-		document.getElementById('teamName').value = null;
+		document.getElementById('teamName').value = '';
 		setReloadTable((oldVal) => oldVal + 1);
 	}, []);
 
 	return (
-		<Grid container spacing={3}>
-			<Grid item xs={12}>
-				<Grid item xs={12} sm={8} justify="center" style={{ textAlign: 'center' }}>
+		<Grid container>
+			<Grid container sm={12} justify="center">
+				<Grid item conatiner className={classes.grid}>
 					<TextField
 						label="New team"
 						id="teamName"
@@ -77,19 +90,15 @@ function App() {
 						onClick={() => {
 							validate(false);
 						}}
-						style={{marginLeft: '1rem', marginTop: '0.5rem'}}
+						className={classes.button}
 					>
 						Add
 					</Button>
-				</Grid>
-			</Grid>
-			<Grid container sm={12} justify="center" spacing={2}>
-				<Grid item conatiner style={{overflowX: 'auto'}}>
 					<TeamsTable
 						reloadTable={reloadTable}
 					/>
 				</Grid>
-				<Grid item conatiner style={{overflowX: 'auto'}}>
+				<Grid item conatiner className={classes.grid}>
 					<TeamPlaysTable
 						reloadTable={reloadTable}
 						setReloadTable={setReloadTable}

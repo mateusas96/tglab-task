@@ -6,10 +6,12 @@
 	min-width: 10rem;
 	max-width: 40rem;
 	max-height: 30rem;
+	margin-top: 1rem;
 }
 
 .teamPlaysTableContainer {
 	min-width: 10rem;
 	max-width: 30rem;
 	max-height: 30rem;
+	margin-top: 4rem;
 }
