@@ -10,10 +10,13 @@ const useStyles = makeStyles(() => ({
 		marginLeft: '1rem',
 		marginTop: '0.5rem',
 	},
-	grid: {
+	childGrid: {
 		padding: '0 2rem',
 		overflowX: 'auto',
 	},
+	mainGrid: {
+		height: '100vh',
+	}
 }));
 
 function App() {
@@ -23,6 +26,7 @@ function App() {
 
 	const classes = useStyles();
 
+	// validate 'New team' field before adding to the teams list
 	const validate = useCallback((validateOnChange) => {
 		const newTeamName = document.getElementById('teamName').value;
 		let error = false;
@@ -32,8 +36,10 @@ function App() {
 			error = true;
 		}
 
+		// get saved teams from local storage
 		const teams = getLocalStorage('teams');
 		
+		// check if team already exists
 		teams.forEach(team => {
 			if (team.name === newTeamName) {
 				setErrorMessage('Team already exists');
@@ -43,10 +49,12 @@ function App() {
 
 		setValidationPassed(!error);
 		
+		// clear error message if error is false
 		if (!error) {
 			setErrorMessage('');
 		}
 
+		// add new team only on button click and if there is no errors
 		if (!validateOnChange && !error) {
 			addNewTeam();
 		}
@@ -55,6 +63,7 @@ function App() {
 	const addNewTeam = useCallback(() => {
 		const teams = getLocalStorage('teams');
 
+		// create new team
 		let newTeam = {
 			'name': document.getElementById('teamName').value,
 			'played': 0,
@@ -64,17 +73,21 @@ function App() {
 			'points': 0,
 		};
 
+		// add new team to the existing teams array
 		teams.push(newTeam);
 
+		// save new teams in local storage
 		setLocalStorage('teams', teams);
+		// delete saved team from input field
 		document.getElementById('teamName').value = '';
+		// increase value to reload tables
 		setReloadTable((oldVal) => oldVal + 1);
 	}, []);
 
 	return (
-		<Grid container>
-			<Grid container sm={12} justify="center">
-				<Grid item conatiner className={classes.grid}>
+		<Grid container className={classes.mainGrid}>
+			<Grid container justify="center">
+				<Grid item className={classes.childGrid}>
 					<TextField
 						label="New team"
 						id="teamName"
@@ -98,7 +111,7 @@ function App() {
 						reloadTable={reloadTable}
 					/>
 				</Grid>
-				<Grid item conatiner className={classes.grid}>
+				<Grid item className={classes.childGrid}>
 					<TeamPlaysTable
 						reloadTable={reloadTable}
 						setReloadTable={setReloadTable}

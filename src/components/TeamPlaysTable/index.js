@@ -1,10 +1,27 @@
-import { Paper, Table, TableBody, TableCell, TableContainer, TableRow, TextField } from "@material-ui/core";
+import { makeStyles, Paper, Table, TableBody, TableCell, TableContainer, TableRow, TextField } from "@material-ui/core";
 import _ from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import { getLocalStorage, setLocalStorage } from '../LocalStorage';
 
+const useStyles = makeStyles(() => ({
+	textField: {
+        width: '50px',
+    },
+    colonTableCell: {
+        fontWeight: 'bold'
+    },
+    tableContainer: {
+        minWidth: '10rem',
+        maxWidth: '30rem',
+        maxHeight: '30rem',
+        marginTop: '4rem',
+    },
+}));
+
 export default function TeamPlaysTable(props) {
     const [teamPlays, setTeamPlays] = useState([]);
+
+    const classes = useStyles();
 
     // add new matches
     useEffect(() => {
@@ -121,7 +138,7 @@ export default function TeamPlaysTable(props) {
     return (
         <TableContainer
             component={Paper}
-            className="teamPlaysTableContainer"
+            className={classes.tableContainer + ' teamPlaysTableContainer'}
             style={{ display: teamPlays.length === 0 ? 'none' : '' }}
         >
 			<Table>
@@ -141,14 +158,14 @@ export default function TeamPlaysTable(props) {
                                         },
                                     }}
                                     defaultValue={play.teamScore1}
-                                    style={{width: '50px'}}
+                                    className={classes.textField}
                                     onBlur={(event) => {
                                         saveScore(index, play.teamName1, event.target.value);
                                     }}
                                 >
                                 </TextField>
                             </TableCell>
-                            <TableCell style={{ fontWeight: 'bold' }} align="center">:</TableCell>
+                            <TableCell className={classes.colonTableCell} align="center">:</TableCell>
                             <TableCell align="left">
                                 <TextField
                                     disabled={play.teamScore2 !== ''}
@@ -159,7 +176,7 @@ export default function TeamPlaysTable(props) {
                                         },
                                     }}
                                     defaultValue={play.teamScore2}
-                                    style={{width: '50px'}}
+                                    className={classes.textField}
                                     onBlur={(event) => {
                                         saveScore(index, play.teamName2, event.target.value);
                                     }}
