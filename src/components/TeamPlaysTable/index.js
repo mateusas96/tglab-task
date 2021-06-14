@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { Table, TableContainer, Paper, TableBody, TableRow, TableCell, TextField } from "@material-ui/core";
-import { getLocalStorage, setLocalStorage } from '../LocalStorage';
+import { Paper, Table, TableBody, TableCell, TableContainer, TableRow, TextField } from "@material-ui/core";
 import _ from 'lodash';
+import React, { useCallback, useEffect, useState } from 'react';
+import { getLocalStorage, setLocalStorage } from '../LocalStorage';
 
 export default function TeamPlaysTable(props) {
     const [teamPlays, setTeamPlays] = useState([]);
@@ -17,8 +17,8 @@ export default function TeamPlaysTable(props) {
                     // check if play exists
                     const playExists = Boolean(teamSavedPlays.find(tsp => {
                         return (
-                            tsp.teamName1.includes(teams[i].name) && tsp.teamName2.includes(teams[j].name) ||
-                            tsp.teamName1.includes(teams[j].name) && tsp.teamName2.includes(teams[i].name)
+                            (tsp.teamName1.includes(teams[i].name) && tsp.teamName2.includes(teams[j].name)) ||
+                            (tsp.teamName1.includes(teams[j].name) && tsp.teamName2.includes(teams[i].name))
                         );
                     }));
 

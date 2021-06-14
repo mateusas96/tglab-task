@@ -1,9 +1,9 @@
-import './App.css';
+import { Button, Grid, TextField } from '@material-ui/core';
 import React, { useCallback, useState } from 'react';
-import { Box, Button, TableCell, TableContainer, TableRow, TextField, Table, TableBody } from '@material-ui/core';
-import TeamsTable from './components/TeamsTable';
+import './App.css';
 import { getLocalStorage, setLocalStorage } from './components/LocalStorage';
 import TeamPlaysTable from './components/TeamPlaysTable';
+import TeamsTable from './components/TeamsTable';
 
 function App() {
 	const [errorMessage, setErrorMessage] = useState('');
@@ -29,9 +29,14 @@ function App() {
 		});
 
 		setValidationPassed(!error);
-		error ? null : setErrorMessage('');
+		
+		if (!error) {
+			setErrorMessage('');
+		}
 
-		validateOnChange ? null : (!error ? addNewTeam() : null);
+		if (!validateOnChange && !error) {
+			addNewTeam();
+		}
 	}, []);
 
 	const addNewTeam = useCallback(() => {
@@ -49,58 +54,49 @@ function App() {
 		teams.push(newTeam);
 
 		setLocalStorage('teams', teams);
-		document.getElementById('teamName').value = '';
+		document.getElementById('teamName').value = null;
 		setReloadTable((oldVal) => oldVal + 1);
 	}, []);
 
 	return (
-		<Box className="App">
-			<Box className="App-header">
-				<TableContainer>
-					<Table>
-						<TableBody>
-							<TableRow>
-								<TableCell>
-									<TextField
-										label="New team"
-										id="teamName"
-										error={!validationPassed}
-										helperText={errorMessage}
-										onChange={() => {
-											validate(true)
-										}}
-									/>
-									<Button
-										variant="contained"
-										color="primary"
-										onClick={() => {
-											validate(false);
-										}}
-										style={{marginLeft: '1rem', marginTop: '0.5rem'}}
-									>
-										Add
-									</Button>
-								</TableCell>
-								<TableCell></TableCell>
-							</TableRow>
-							<TableRow>
-								<TableCell style={{width: '40rem'}}>
-									<TeamsTable
-										reloadTable={reloadTable}
-									/>
-								</TableCell>
-								<TableCell>
-									<TeamPlaysTable
-										reloadTable={reloadTable}
-										setReloadTable={setReloadTable}
-									/>
-								</TableCell>
-							</TableRow>
-						</TableBody>
-					</Table>
-				</TableContainer>
-			</Box>
-		</Box>
+		<Grid container spacing={3}>
+			<Grid item xs={12}>
+				<Grid item xs={12} sm={8} justify="center" style={{ textAlign: 'center' }}>
+					<TextField
+						label="New team"
+						id="teamName"
+						error={!validationPassed}
+						helperText={errorMessage}
+						onChange={() => {
+							validate(true)
+						}}
+					/>
+					<Button
+						variant="contained"
+						color="primary"
+						onClick={() => {
+							validate(false);
+						}}
+						style={{marginLeft: '1rem', marginTop: '0.5rem'}}
+					>
+						Add
+					</Button>
+				</Grid>
+			</Grid>
+			<Grid container sm={12} justify="center" spacing={2}>
+				<Grid item conatiner style={{overflowX: 'auto'}}>
+					<TeamsTable
+						reloadTable={reloadTable}
+					/>
+				</Grid>
+				<Grid item conatiner style={{overflowX: 'auto'}}>
+					<TeamPlaysTable
+						reloadTable={reloadTable}
+						setReloadTable={setReloadTable}
+					/>
+				</Grid>
+			</Grid>
+		</Grid>
 	);
 }
 
